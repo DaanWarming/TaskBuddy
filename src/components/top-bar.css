@@ -1,0 +1,46 @@
+
+
+.top-bar {
+    height: 50px;
+    width: 100%;
+    box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.top-bar-dark {
+    background-color: #444654;
+    transition: background-color .2s ease-in-out;
+}
+
+.top-bar--info {
+    margin: 0 auto;
+}
+
+.top-bar-dark .top-bar--info {
+    color: #FFFFFF;
+    transition: color .2s ease-in-out;
+}
+
+.top-bar-hamburger-icon {
+    width: 24px;
+    height: auto;
+    position: fixed;
+    left: 24px;
+}
+
+.top-bar-hamburger-icon-desktop {
+    width: 24px;
+    height: auto;
+    position: fixed;
+    cursor: pointer;
+}
+
+.top-bar-hamburger-icon-desktop-open {
+    left: 324px;
+}
+
+.top-bar-hamburger-icon-desktop-closed {
+    left: 24px;
+}

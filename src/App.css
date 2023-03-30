@@ -1,0 +1,202 @@
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+a {
+  cursor: pointer;
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #FFFFFF;
+}
+
+
+.app {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 100vh;
+  min-width: 100vw;
+  transition: background-color .2s ease-in-out;
+}
+
+.app-dark {
+  background-color: #343541;
+  color-scheme: dark;
+}
+
+.top-and-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%; 
+  max-height: 100vh;
+  width: 100%;
+  margin-left: auto;
+  transition: width .3s linear;
+}
+
+.main-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  max-width: 1280px;
+  height: 100%;
+  min-width: 100%;
+  overflow-y: scroll;
+}
+
+.chat-box {
+  overflow: visible;
+  height: fit-content;
+  width: 800px;
+  margin-bottom: 30px;
+  transition: height 0.5s ease-in-out;
+  text-align: left;
+  transition: background-color .2s ease-in-out;
+}
+
+.app-dark .chat-box {
+  background-color: #343541;
+}
+
+.cs-chat-container {
+  transition: background-color .2s ease-in-out;
+}
+
+.app-dark .cs-chat-container {
+  background-color: #343541;
+}
+
+.cs-message-list {
+  margin-top: 50px;
+  margin-bottom: 100px;
+  transition: background-color .2s ease-in-out;
+}
+
+.app-dark .cs-message-list {
+  background-color: #343541;
+}
+
+.app-dark .cs-typing-indicator {
+  background-color: #343541 !important;
+}
+
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(30%);
+
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+[aria-label="user"] .cs-message__content-wrapper .cs-message__content {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 10.192px;
+  background-color: #2DD900;
+  color: #FFFFFF;
+  max-width: 653px;
+  animation: slideIn 200ms ease-out backwards;
+}
+
+[aria-label="ChatGpt"] .cs-message__content-wrapper .cs-message__content {
+  border-top-right-radius: 10.192px;
+  border-top-left-radius: 0px;
+  border-bottom-right-radius: 10.192px;
+  background-color: #3B82F6;
+  color: #FFFFFF;
+  animation: slideIn 200ms ease-out backwards;
+}
+
+.cs-message-input {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: 800px;
+  background-color: transparent;
+  border-top: none !important;
+  padding-bottom: 20px !important;
+  height: auto;
+  max-height: 500px;
+  transition: background-color .2s ease-in-out;
+}
+
+.app-dark .cs-message-input {
+  background-color: #343541 !important;
+}
+
+.cs-message-input__content-editor-wrapper {
+  background-color: #FFFFFF !important;
+  border: 1px solid #D1D5DB;
+  max-width: 92.7%;
+  position:absolute;
+  height: auto;
+  max-height: 500px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  transition: background-color .2s ease-in-out;
+}
+
+.app-dark .cs-message-input__content-editor-wrapper {
+  background-color: #63646C !important;
+  border-color: #51535f;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 8px 0px;
+}
+
+
+.cs-message-input__content-editor-container {
+  height: auto;
+  max-height: 460px !important;
+}
+
+
+.cs-message-input__content-editor {
+  background-color: #FFFFFF !important;
+  transition: background-color .2s ease-in-out;
+}
+
+.app-dark .cs-message-input__content-editor {
+  background-color: #63646C !important;
+  color: #FFFFFF !important;
+}
+
+.app-dark .cs-message-list__typing-indicator-container {
+  background-color: #444654 !important;
+}
+
+
+
+.chat-action-btns {
+  position: fixed;
+  bottom: 90px;
+  margin-top: -100px;
+  z-index: 101;
+}
+
+.stop-chat {
+  background-color: red;
+  padding: 8px 20px;
+  font-size: 12px;
+  color: #FFFFFF;
+  border-radius: 25PX;
+  display: flex;
+  align-items: center;
+}
+
+.stop-icon {
+  width: auto;
+  height: 15px;
+  margin-right: 6px;
+}
+
+@media screen and (max-width: 810px) {
+  .chat-box {
+    width: 100%;
+  }
+}
