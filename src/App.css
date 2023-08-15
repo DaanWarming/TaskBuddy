@@ -2,6 +2,10 @@
   font-family: 'Inter', sans-serif;
 }
 
+:root {
+  color-scheme: light only;
+}
+
 a {
   cursor: pointer;
   color: #FFFFFF;
@@ -20,6 +24,7 @@ a:hover {
   height: 100vh;
   min-width: 100vw;
   transition: background-color .2s ease-in-out;
+  overflow-y: hidden;
 }
 
 .app-dark {
@@ -35,7 +40,7 @@ a:hover {
   max-height: 100vh;
   width: 100%;
   margin-left: auto;
-  transition: width .3s linear;
+  overflow-y: hidden;
 }
 
 .main-section {
@@ -48,13 +53,21 @@ a:hover {
   height: 100%;
   min-width: 100%;
   overflow-y: scroll;
+  background-color: #FFFFFF;
+  transition: background-color .2s ease-in-out;
+  color-scheme: light;
+}
+
+.app-dark .main-section {
+  background-color: #343541;
+  color-scheme: dark;
 }
 
 .chat-box {
   overflow: visible;
   height: fit-content;
   width: 800px;
-  margin-bottom: 30px;
+  margin-bottom: 0px;
   transition: height 0.5s ease-in-out;
   text-align: left;
   transition: background-color .2s ease-in-out;
@@ -76,6 +89,7 @@ a:hover {
   margin-top: 50px;
   margin-bottom: 100px;
   transition: background-color .2s ease-in-out;
+  pointer-events: none;
 }
 
 .app-dark .cs-message-list {
@@ -97,10 +111,15 @@ a:hover {
   }
 }
 
+[aria-label="ChatGpt"] .cs-message__content-wrapper {
+  touch-action: pan-y;
+}
+
+
 [aria-label="user"] .cs-message__content-wrapper .cs-message__content {
   border-top-right-radius: 0px;
   border-bottom-right-radius: 10.192px;
-  background-color: #2DD900;
+  background-color: #969090;
   color: #FFFFFF;
   max-width: 653px;
   animation: slideIn 200ms ease-out backwards;
@@ -113,7 +132,48 @@ a:hover {
   background-color: #3B82F6;
   color: #FFFFFF;
   animation: slideIn 200ms ease-out backwards;
+  cursor: pointer;
+  transition: all .2s ease-in-out;
+  pointer-events: initial !important;
 }
+
+[aria-label="ChatGpt"] .cs-message__content-wrapper .cs-message__content:hover {
+  background-color: #0564FB;
+}
+
+@keyframes slowGrow {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+[aria-label="ChatGpt"] .cs-message__content-wrapper {
+  display: flex;
+  align-items: flex-end;
+  animation: slowGrow 200ms ease-out backwards;
+}
+
+.copied-text {
+  position: relative;
+  margin-top: -10px;
+  margin-right: 0px;
+  height: 24px;
+  padding: 2px 12px 3px 14px;
+  border: 2px solid white;
+  cursor: pointer;
+  background-color: #6B7280;
+  color: #FFFFFF;
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 16px;
+  animation: slideIn 200ms ease-out backwards;
+}
+
 
 .cs-message-input {
   position: fixed;
@@ -166,6 +226,10 @@ a:hover {
   color: #FFFFFF !important;
 }
 
+.cs-typing-indicator {
+  margin-left: 10px;
+}
+
 .app-dark .cs-message-list__typing-indicator-container {
   background-color: #444654 !important;
 }
@@ -195,8 +259,29 @@ a:hover {
   margin-right: 6px;
 }
 
+@media screen and (max-width: 1100px) {
+  [aria-label="ChatGpt"] .cs-message__content-wrapper .cs-message__content {
+    pointer-events: none !important;
+  }
+
+  [aria-label="ChatGpt"] .cs-message__content-wrapper .cs-message__content:hover {
+    background-color: #3B82F6;
+  }
+
+}
+  
+
+
 @media screen and (max-width: 810px) {
   .chat-box {
     width: 100%;
   }
 }
+
+
+@media screen and (max-width: 400px) {
+  .cs-message-list__scroll-wrapper>.cs-message {
+    max-width: 90% !important;
+  }
+}
+  

@@ -1,3 +1,7 @@
+.top-bar-container {
+    width: 100%;
+    z-index: 99;
+}
 
 
 .top-bar {
@@ -6,7 +10,9 @@
     box-shadow: rgba(33, 35, 38, 0.1) 0px 10px 10px -10px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    background-color: #FFFFFF;
+    z-index: 99;
 }
 
 .top-bar-dark {
@@ -15,7 +21,7 @@
 }
 
 .top-bar--info {
-    margin: 0 auto;
+    color: #444654;
 }
 
 .top-bar-dark .top-bar--info {
@@ -26,21 +32,159 @@
 .top-bar-hamburger-icon {
     width: 24px;
     height: auto;
-    position: fixed;
-    left: 24px;
+    margin-left: 22px;
+    cursor: pointer;
 }
 
 .top-bar-hamburger-icon-desktop {
     width: 24px;
     height: auto;
-    position: fixed;
     cursor: pointer;
+    margin-left: 22px;
 }
 
-.top-bar-hamburger-icon-desktop-open {
-    left: 324px;
+
+.top-bar-home-icon {
+    width: 22px;
+    height: auto;
+    cursor: pointer;
+    margin-right: 22px;
 }
 
-.top-bar-hamburger-icon-desktop-closed {
-    left: 24px;
+/* ---- tutorial intro screen ----- */
+
+.tutorial-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    top: 0;
+    left: 0;
+    z-index: 12345;
+    overflow-y: auto;
+}
+
+.tutorial-card {
+    margin: 40px auto;
+    max-width: 520px;
+    background-color: #ffff;
+    padding: 10px 24px;
+    border-radius: 10px;
+}
+
+.tutorial-card-dark {
+    background-color: #444654;
+    color: #FFFFFF;
+}
+
+.tutorial-card-title {
+    color: #27282c;
+    font-size: 44px;
+    text-align: center;
+    margin-bottom: 0;
+}
+
+.tutorial-card-dark .tutorial-card-title {
+    color: #FFFFFF;
+}
+
+.tutorial-card-title-sub-text {
+    color: #27282c;
+    font-size: 20px;
+    text-align: center;
+    margin: 0 0 50px
+}
+
+.tutorial-card-dark .tutorial-card-title-sub-text {
+    color: #FFFFFF;
+}
+
+.tutorial-card-text {
+    color: #444654;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.tutorial-card-dark .tutorial-card-text {
+    color: #FFFFFF;
+    
+}
+
+.tutorial-card-image {
+    width: 100%;
+    height: auto;
+    border: 1px solid rgb(216, 216, 216);
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+.tutorial-card-dark .tutorial-card-image {
+    border: 1px solid #818181;
+}
+
+.tutorial-card-free-trial {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.tutorial-card-free-trial-first {
+    margin-bottom: 100px;
+}
+
+.tutorial-card-free-trial-text {
+    color: #78CC0C;
+    font-size: 30px;
+    text-align: center;
+    margin: 0;
+}
+
+.tutorial-card-free-trial-btn {
+    background-color: #78CC0C;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 14px;
+    transition: background-color .2s ease-in-out;
+}
+
+.tutorial-card-free-trial-btn:hover {
+    background-color: #96DC3A;
+}
+
+@media screen and (max-width: 400px) {
+    .top-bar-hamburger-icon {
+        left: 12px;
+    }
+
+    .top-bar-home-icon {
+        right: 12px;
+    }
+
+    .tutorial-card {
+        padding: 10px 14px;
+    }
+
+    .tutorial-card-title {
+        font-size: 34px;
+    }
+
+    .tutorial-card-title-sub-text {
+        font-size: 18px;
+    }
+
+    .tutorial-card-text {
+        font-size: 16px;
+    }
+
+    .tutorial-card-image {
+        margin-bottom: 8px;
+    }
 }

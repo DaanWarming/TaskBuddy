@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './side-menu.css'
-import trashBin from "../assets/icons/gray-trash-icon.png"
-import trashBinWhite from "../assets/icons/white-trahs-icon.png"
-import pencil from "../assets/icons/edit-gray-icon.png"
-import pencilWhite from "../assets/icons/edit-white-icon.png"
-import chatCloud from "../assets/icons/chat-white-icon.png"
-import sunIcon from "../assets/icons/sun-icon.png"
-import feedbackIcon from "../assets/icons/feedback-icon-white.png"
-import crossIcon from "../assets/icons/cross-icon-grey.png"
-import whiteCrossIcon from "../assets/icons/cross-icons-white.png"
-import checkIcon from "../assets/icons/check-icon-grey.png"
-import whiteCheckIcon from "../assets/icons/check-icon-white.png"
-import closeIcon from "../assets/icons/close-icons-white.png"
+import trashBin from "/assets/icons/gray-trash-icon.png"
+import trashBinWhite from "/assets/icons/white-trahs-icon.png"
+import pencil from "/assets/icons/edit-gray-icon.png"
+import pencilWhite from "/assets/icons/edit-white-icon.png"
+import chatCloud from "/assets/icons/chat-white-icon.png"
+import sunIcon from "/assets/icons/sun-icon.png"
+import feedbackIcon from "/assets/icons/feedback-icon-white.png"
+import crossIcon from "/assets/icons/cross-icon-grey.png"
+import whiteCrossIcon from "/assets/icons/cross-icons-white.png"
+import checkIcon from "/assets/icons/check-icon-grey.png"
+import whiteCheckIcon from "/assets/icons/check-icon-white.png"
+import closeIcon from "/assets/icons/close-icons-white.png"
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { AnimatePresence, motion } from "framer-motion";
 
 
 
@@ -59,7 +61,7 @@ function CheckIcon({editChatName, chatInfo}) {
     )
 }
 
-function FeedbackScreen({setFeedbackScreen}) {
+function FeedbackScreen({setFeedbackScreen, isDarkMode}) {
     
     function closeCharacterList(event) {
         event.preventDefault()
@@ -69,20 +71,21 @@ function FeedbackScreen({setFeedbackScreen}) {
     }
     return (
         <div className="feedback-screen-container" onClick={closeCharacterList}>
-            <div className="feedback-screen">
+            <div className={`feedback-screen ${isDarkMode ? 'feedback-screen-dark' : ''}`}>
                 <h3>Send Feedback</h3>
                 <p>All feedback, suggestions, feature requests, and bug reports are welcomed!</p>
-                <a>feedback@company.com</a>
+                <a>feedback@placeholder.com</a>
                 <a className="close-btn" onClick={() => setFeedbackScreen(false)}>Close</a>
             </div>
         </div>
     )
 }
 
-function OldChatHistory({chatId, chatInfo, setUpdateList, updateList, setOldChat, setChatPersona, setMessages, setChatId, messages, clickedId, setClickedId}) {
+function OldChatHistory({chatId, chatInfo, setUpdateList, updateList, setOldChat, setIsMenuOpen, windowSize, setChatPersona, setMessages, setChatId, messages, clickedId, setClickedId}) {
     const [showDelete, setShowDelete] = useState(false)
     const [showEdit, setShowEdit] = useState(false)
     const [editText, setEditText] = useState(chatInfo.persona.name)
+    const editTextFocus = useRef(null)
 
     useEffect(() => {
         if (showDelete) {
@@ -127,14 +130,16 @@ function OldChatHistory({chatId, chatInfo, setUpdateList, updateList, setOldChat
         setChatPersona(chatInfo.persona)
         setMessages(chatInfo.messages)
         setChatId(key)
-        
         setClickedId(key);
+        if (windowSize < 1100) {
+            setIsMenuOpen(false)
+        }
     }
 
     return (
         <li key={chatId} className={`chat-history-chat ${clickedId === chatId ? "clicked-chat" : ""}`}>
             <img className="menu-icon menu-icon-bubble" src={chatCloud} onClick={() => openChat(key, chatInfo)} />
-            <div className="chat-history-text"  onClick={() => {showEdit == false && openChat(chatId, chatInfo)}} onFocus={(e)=>e.currentTarget.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)}>
+            <div className="chat-history-text"  onClick={() => {showEdit == false && openChat(chatId, chatInfo)}} >
                 {showEdit ? <textarea ref={editTextFocus} className="edit-title-area" value={editText} onChange={e => setEditText(e.target.value)}></textarea> : <p className="chat-history-title">{chatInfo.persona.name}</p>}
                 <p className="chat-history-description">{chatInfo.persona.description}</p>
             </div>
@@ -153,7 +158,7 @@ function OldChatHistory({chatId, chatInfo, setUpdateList, updateList, setOldChat
 }
 
 
-export default function SideMenu({setChatPersona, messages, setMessages, setOldChat, setChatId, clickedId, setClickedId, isMenuOpen, setIsMenuOpen, windowSize, setIsDarkMode, isDarkMode}) {
+export default function SideMenu({apiTokens, setChatPersona, messages, setMessages, setOldChat, setChatId, clickedId, setClickedId, isMenuOpen, setIsMenuOpen, windowSize, setIsDarkMode, isDarkMode, initialInstruction}) {
     const [chatArchiveList, setChatArchiveList] = useState([])
     const [updateList, setUpdateList] = useState(false)
     const [feedbackScreen, setFeedbackScreen] = useState(false)
@@ -162,63 +167,149 @@ export default function SideMenu({setChatPersona, messages, setMessages, setOldC
         event.preventDefault()
         if (event.target === event.currentTarget) {
             setIsMenuOpen(false)
+            localStorage.setItem('menu-open', false);
         }
     }
 
     // toggles dark mode and saves it to local storage
     function toggleDarkMode() {
-        setIsDarkMode(!isDarkMode);
-        localStorage.setItem('dark-mode', isDarkMode);
+        const newDarkMode = !isDarkMode;
+        setIsDarkMode(newDarkMode);
+        localStorage.setItem('dark-mode', newDarkMode);
     }
 
-
-    // get all chats from local storage and display them in left menu
     useEffect(() => {
-        var chatArchive = []
-        for(let i = 0, len=localStorage.length; i<len; i++) {
+        var chatArchive = [];
+        var chatOrder = JSON.parse(localStorage.getItem('ORDER')) || [];
+    
+        // Create an array of chat IDs in the order stored in local storage
+        var chatOrderIds = chatOrder.map(chat => chat.chatId);
+        for (let i = 0, len = localStorage.length; i < len; i++) {
             var key = localStorage.key(i);
             var value = localStorage[key];
-
-            if (key.includes("CHAT_")) {
-                let chatInfo = JSON.parse(value)
-                let chatId = chatInfo.chatId
-                chatArchive.push( 
-                    <OldChatHistory key={chatId} chatId={chatId} chatInfo={chatInfo} setUpdateList={setUpdateList} updateList={updateList} setOldChat={setOldChat} 
-                    setChatPersona={setChatPersona} setMessages={setMessages} setChatId={setChatId} messages={messages} clickedId={clickedId} setClickedId={setClickedId}/>
-                )
+        
+            if (key.includes('CHAT_')) {
+            let chatInfo = JSON.parse(value);
+            let chatId = chatInfo.chatId;
+            chatArchive.push(
+                <OldChatHistory
+                    key={chatId}
+                    chatId={chatId}
+                    chatInfo={chatInfo}
+                    setUpdateList={setUpdateList}
+                    updateList={updateList}
+                    setOldChat={setOldChat}
+                    setChatPersona={setChatPersona}
+                    setMessages={setMessages}
+                    setChatId={setChatId}
+                    messages={messages}
+                    clickedId={clickedId}
+                    setClickedId={setClickedId}
+                    setIsMenuOpen={setIsMenuOpen}
+                    windowSize={windowSize}
+                />
+            );
             }
         }
-        setChatArchiveList(chatArchive)
-    }, [ , updateList, messages])
+        
+        // If chatOrderIds is not empty and has the same length as chatArchive, re-order the chatArchive
+        if (chatOrderIds.length > 0 && chatOrderIds.length === chatArchive.length) {
+            chatArchive.sort((a, b) => {
+            const aIndex = chatOrderIds.indexOf(a.props.chatId);
+            const bIndex = chatOrderIds.indexOf(b.props.chatId);
+            return aIndex - bIndex;
+            });
+        }
+        
+        // Update the order of the chats in local storage
+        chatOrder = chatArchive.map(chat => ({
+            chatId: chat.props.chatId,
+            chatInfo: chat.props.chatInfo
+        }));
+        localStorage.setItem('ORDER', JSON.stringify(chatOrder));
+        
+        setChatArchiveList(chatArchive);
+    }, [updateList, messages]);
 
+    
+
+    function onDragEnd(result) {
+        if (!result.destination) {
+            return;
+        }
+        
+        const items = Array.from(chatArchiveList);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+        
+        // Update the order of the chats in local storage
+        const chatOrder = items.map(chat => ({
+            chatId: chat.props.chatId,
+            chatInfo: chat.props.chatInfo
+        }));
+        localStorage.setItem('ORDER', JSON.stringify(chatOrder));
+        
+        setChatArchiveList(items);
+    }
 
     function startNewChat() {
         setChatPersona({
             name: 'ChatGpt',
             id: "chatgpt",
-            description: "Act as ChatGpt",
+            description: "I'm the same ChatGpt you know from OpenAI",
             firstQuestion: "Ask me a question",
             systemMessage: {
                 role: "system",
-                content: `You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.`
+                content: initialInstruction
             }
         })
         setOldChat(false)
+        if (windowSize < 1100) {
+            setIsMenuOpen(false)
+        }
     }
 
-    function SideMenuScreen() {
+    function SideMenuScreen({isDarkMode}) {
         return (
-            <div className={`side-menu ${isMenuOpen ? 'side-menu--open' : ''}`}>
+            <div className={`side-menu ${isMenuOpen ? 'side-menu-open' : 'side-menu-closed'}`}>
                 <div className="new-chat">
                     <button className="new-chat-btn" onClick={startNewChat}><img className="menu-icon new-chat-icon" src={chatCloud}/>New Chat</button>
                 </div>
-                <div className="chat-archive-container">
-                    <ul className="chat-archive">{chatArchiveList}</ul>
+                {chatArchiveList.length === 0 ? 
+                <div className="no-chats-container">
+                    <h4 className="no-chats-text no-chats-title">No chats yet</h4>
+                    <p className="no-chats-text no-chats-description">Old chats will be displayed here</p> 
                 </div>
+                    : 
+                <div className="chat-archive-container">
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <Droppable droppableId="chat-archive">
+                        {(provided) => (
+                            <div className="chat-archive" ref={provided.innerRef} {...provided.droppableProps}>
+                            {chatArchiveList.map((chat, index) => (
+                                <Draggable key={chat.key} draggableId={chat.props.chatId} index={index}>
+                                {(provided) => (
+                                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                        {chat}
+                                    </div>
+                                )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                            </div>
+                        )}
+                        </Droppable>
+                    </DragDropContext>
+                </div>
+                }
                 <div className="settings">
-                    <p className="account-status">Account: Free Trial</p>
+                    <div className="settings-account">
+                        <p className="settings-account-status">Account: Free Trial</p>
+                        <p className="settings-account-status-tokens">{Math.round(100 - apiTokens / 20000 * 100)}% Remaining</p>
+                    </div>
+                    
                     <div className="settings-info-bottom">
-                        <p className="settings-copyright">TaskGPT © 2023</p>
+                        <p className="settings-copyright">TaskBuddy © 2023</p>
                         <div className="settings-info-links">
                             <a className="settings-info-links-link">Privacy |</a>
                             <a className="settings-info-links-link"> Terms |</a>
@@ -230,22 +321,40 @@ export default function SideMenu({setChatPersona, messages, setMessages, setOldC
                         </div>
                     </div>
                 </div>
-                {feedbackScreen && <FeedbackScreen setFeedbackScreen={setFeedbackScreen} />}
+                {feedbackScreen && <FeedbackScreen setFeedbackScreen={setFeedbackScreen} isDarkMode={isDarkMode} />}
             </div>
     )
     }
 
     return (
         <>
+        <AnimatePresence>
             {windowSize > 1100 ? 
-                isMenuOpen && <SideMenuScreen /> : 
+                isMenuOpen && <SideMenuScreen isDarkMode={isDarkMode} /> : 
                 isMenuOpen && 
-                <div className="side-menu-mobile-container" onClick={closeMobileMenu}>
-                    <div className="side-menu-mobile">
-                        <SideMenuScreen />
-                    </div>
+                <motion.div
+                    key="side-menu-mobile-container-animation"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.20, ease: "linear" }}
+                    className="side-menu-mobile-container"
+                    onClick={closeMobileMenu}
+                >
+                    <motion.div
+                        key="side-menu-mobile-animation"
+                        initial={{ x: "-300px" }}
+                        animate={{ x: "0px" }}
+                        exit={{ x: "-300px" }}
+                        transition={{ duration: 0.40, ease: "easeOut" }}
+                        className="side-menu-mobile"
+                        onClick={closeMobileMenu}
+                    >
+                        <SideMenuScreen isDarkMode={isDarkMode}/>
+                    </motion.div>
                     <img className="side-menu-close" onClick={closeMobileMenu} src={closeIcon} />
-                </div>}
+                </motion.div>}
+        </AnimatePresence>
         </>
         
         

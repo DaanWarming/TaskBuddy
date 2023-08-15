@@ -2,98 +2,43 @@ import { useEffect, useState, useRef } from 'react'
 import './App.css'
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { MainContainer, ChatContainer, MessageList, Message, MessageInput, TypingIndicator  } from '@chatscope/chat-ui-kit-react';
-import { arrayItems } from './Prompts'
+import { arrayItemsPrompts } from './Prompts'
 import OptionSelection from './components/OptionSelection'
 import SideMenu from './components/SideMenu';
 import TopBar from './components/TopBar';
-import stopIcon from "./assets/icons/stop-icon-white.png"
+import stopIcon from "/assets/icons/stop-icon-white.png"
+import copyIcon from "/assets/icons/copy-icon-gray.png"
+import { motion } from 'framer-motion';
 
 const API_KEY = import.meta.env.VITE_API_KEY
 
 
-// scrollbar should be moved to side of screen
-// make input box background cover bottom of screen
-// make a stop button
-// set when api is responding cant send second message
-// make input box keep width when send button is away
-// when to many chat history, make it scrollable
-// add a feedback screen
-// style menu settings
-// style the home page
-// style scroll bar in chat history
-// change chat history list to Components list
-// add edit button to old chat title's
-// fix confirm and cancel chat title edit buttons
-// fix delete old chat button pushing menu wider
+///////////// priority //////////////////////
 
-// fixed pasting text into input box
-// improve prompts info in chat
-// style select characters popup
-// search for good prompts
-// test prompts
+// fix drag and drop of tasks bug
 
-// fixed text input grow when text is bigger than input box  ~ 1 hour
-// fix when text is copied into input box  ~ 5 minutes
-// added extra colors to option-selection ~ 15 minutes
-// add scroll to character popup ~ 1 minute
-// add good description to all prompts ~ 45 minutes
-// add on paste to input box ~ 20 minutes
-// fix when chat is loading and switching to other chat it keeps loading ~ 5 minutes
-// add animations to cards ~ 5 minutes
-// on hover change character icon to white ~ 30 minutes
-// add different color icons on hover to old chat ~ 30 minutes
-// fix when old chat is true that focus went to right input box ~ 40 minutes
-// added old chat background color is changed when selected ~ 50 minutes
-// add animation when more characters screen is opened ~ 20 minutes
-// add animation when feedback screen is opened ~ 5 minutes
-// when chat is loaded scroll to bottom ~ 30 minutes
 
-// made mobile menu ~ 1 hour
-// made mobile menu fade in ~ 30 minutes
-// made mobile friendly ~ 1 hour
-// add new chat button ~ 20 minutes
+// finish popup screen of 50% and 10% left of free trial
 
-// woensdag
-// make hamburger menu option always visible  ~ 15 minutes
-// add animation to menu desktop open ~ 10 minutes
-// add darker hamburger icon on hover ~ 10 minutes
-// fixed on hover effect new chat button ~ 5 minutes
-// fixed home screen height chat box ~ 5 minutes
-// change text from character to task  ~ 10 minutes
-// add dark mode to app ~ 80 minutes
+// make a popup screen when api has error
 
-// donderdag
-// add dark mode color to task cards ~ 20 minutes
-// save dark mode in the local storage, ask chat gpt how to do this ~ 5 minutes
-// trying to add animation to side menu ~ 35 minutes
-// change placeholder text of input box on dark mode ~ 10 minutes
-// fixed some dark mode bugs ~ 15 minutes
 
-// change text of tasks
+// add a user limit of tokens
+// add premium subscription
 
 
 
-// add stop button functionality
+// add google analytics when there is a url?
+
+
 // add a FAQ screen
 // add a privacy policy screen
 // add a terms of service screen
-// add dark mode
-// add favorite button to old chats
-// add option to change model
-// add settings screen
 // add not selecting text when clicking on buttons
 // add not selecting text to text in top bar
-// add a copy to clipboard button to chats
 
 
 
-// big features
-
-// add token count to user
-// add settings screen to change chat behavior
-// make custom titles for old chats
-// keep text input when changing between chats
-// add search bar too tasks list
 
 
 
@@ -110,7 +55,7 @@ function App() {
   const [chatPersona, setChatPersona] = useState({
     name: 'ChatGpt',
     id: "chatgpt",
-    description: "Act as ChatGpt",
+    description: "I'm the same ChatGpt you know from OpenAI",
     firstQuestion: "Ask me a question",
     systemMessage: {
         role: "system",
@@ -119,7 +64,7 @@ function App() {
   })
   const [messages, setMessages] = useState([
     {
-      message: `Hello I'm a ${chatPersona.name} `,
+      message: `Hello, I'm ${chatPersona.name} `,
       sender: "ChatGpt"
     },{
       message: `${chatPersona.description}`,
@@ -132,29 +77,92 @@ function App() {
   const [chatId, setChatId] = useState()
   const [oldChat, setOldChat] = useState(false)
   const controller = new AbortController();
-  const signal = controller.signal;
   const inputTxt = useRef(null)
   const [inputValue, setInputValue ] = useState(""); 
   const [clickedId, setClickedId] = useState("");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(localStorage.getItem('menu-open') === 'true');
   const [windowSize, setWindowSize] = useState(window.innerWidth);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('dark-mode') === null ? true : localStorage.getItem('dark-mode') === 'true');
+  const [apiModel, setApiModel] = useState("gpt-3.5-turbo");
+  const [apiTemperature, setApiTemperature] = useState(0.7);
+  const [apiStream, setApiStream] = useState(false);
+  const [initialApiInstruction, setInitialApiInstruction] = useState("You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.");
+  const [initialInstruction, setInitialInstruction] = useState(initialApiInstruction)
+  const [languageOutput, setLanguageOutput] = useState("Default");
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [apiTokens, setApiTokens] = useState(Number(localStorage.getItem('apiTokens')) || 0);
+  const [arrayItems, setArrayItems] = useState(() =>
+    JSON.parse(localStorage.getItem('arrayItems')) || arrayItemsPrompts
+  );
+  const [isApiTokenPopupOpen, setIsApiTokenPopupOpen] = useState(false);
 
-    useEffect(() => {
-        const handleWindowResize = () => {
-            setWindowSize(window.innerWidth);
-        };
-        window.addEventListener('resize', handleWindowResize);
-        return () => {
-            window.removeEventListener('resize', handleWindowResize);
-        };
-    });
+  // saves the apiTokens to local storage
+  useEffect(() => {
+    const hasPopupHalfOpened = localStorage.getItem('isPopupOpenedHalf')
+    const hasPopupTenOpened = localStorage.getItem('isPopupOpenedTen');
 
+    localStorage.setItem('apiTokens', apiTokens);
+    if (apiTokens > 10000 && hasPopupHalfOpened != 'true') {
+      setIsApiTokenPopupOpen(true)
+      localStorage.setItem('isPopupOpenedHalf', 'true');
+    } else if (apiTokens > 18000 && hasPopupTenOpened != 'true') {
+      setIsApiTokenPopupOpen(true)
+      localStorage.setItem('isPopupOpenedTen', 'true');
+    }
+  }, [apiTokens]);
 
+  // Loads the chat settings from local storage if it exists
+  useEffect(() => {
+    const modelSettings = localStorage.getItem("MODEL_SETTINGS");
+    if (modelSettings) {
+      const {
+        apiModel: storedApiModel,
+        apiTemperature: storedApiTemperature,
+        apiStream: storedApiStream,
+        initialApiInstruction: storedInitialApiInstruction,
+        languageOutput: storedLanguageOutput
+      } = JSON.parse(modelSettings);
+      setApiModel(storedApiModel);
+      setApiTemperature(storedApiTemperature);
+      setApiStream(storedApiStream);
+      setInitialApiInstruction(storedInitialApiInstruction);
+      setLanguageOutput(storedLanguageOutput);
+      setChatPersona({
+        name: 'ChatGpt',
+        id: "chatgpt",
+        description: "I'm the same ChatGpt you know from OpenAI",
+        firstQuestion: "Ask me a question",
+        systemMessage: {
+            role: "system",
+            content: storedInitialApiInstruction
+        }
+      })
+    }
+
+    const hasTutorialBeenShown = localStorage.getItem("hasTutorialBeenShown");
+      if (!hasTutorialBeenShown) {
+          setIsTutorialOpen(true);
+          localStorage.setItem("hasTutorialBeenShown", true);
+      }
+  }, []);
+
+  
+  useEffect(() => {
+      const handleWindowResize = () => {
+          setWindowSize(window.innerWidth);
+      };
+      window.addEventListener('resize', handleWindowResize);
+      return () => {
+          window.removeEventListener('resize', handleWindowResize);
+      };
+  });
+
+  // Generates a random number for the chat id
   function getRandomNumber() { 
     return Math.floor(100000 + Math.random() * 90000000)
   }
 
+  // Scrolls to the bottom of the chat
   function scrollToBottom() {
     const bottomChat = document.querySelector(".cs-message-list__scroll-to")
     setTimeout(() => {bottomChat.scrollIntoView({ behavior: "smooth" })}, 100)
@@ -162,16 +170,62 @@ function App() {
   }
 
 
-  // Generates a new chat id on page load
+  useEffect(() => {
+    const elements = document.querySelectorAll('.cs-message__content-wrapper');
+    elements.forEach(element => {
+      element.addEventListener('click', handleCopyToClipboard);
+      element.addEventListener('mouseout', handleMouseOut);
+    });
+  
+    return () => {
+      elements.forEach(element => {
+        element.removeEventListener('click', handleCopyToClipboard);
+        element.removeEventListener('mouseout', handleMouseOut);
+      });
+    };
+  }, [typingStatus]);
+
+  // copies message to clipboard when clicked
+  function handleCopyToClipboard(event) {
+    const parentEl = event.target.closest('.cs-message__content-wrapper');
+    const copiedTextEl = parentEl.querySelector('.copied-text');
+  
+    if (!copiedTextEl) {
+      const textToCopy = parentEl.querySelector('.cs-message__html-content').textContent;
+      navigator.clipboard.writeText(textToCopy);
+  
+      const copiedText = document.createElement('p');
+      copiedText.classList.add('copied-text');
+      copiedText.textContent = 'Copied!';
+      parentEl.appendChild(copiedText);
+  
+      setTimeout(() => {
+        const toRemove = parentEl.querySelector('.copied-text');
+        if (toRemove) {
+          toRemove.parentNode.removeChild(toRemove);
+        }
+      }, 1200); // adjust the delay time as needed
+    }
+  }
+  
+  function handleMouseOut(event) {
+    const copiedText = event.target.closest('.cs-message__content-wrapper').querySelector('.copied-text');
+    if (copiedText) {
+      copiedText.parentNode.removeChild(copiedText);
+    }
+
+  }
+
+  // Generates a new chat id on page load ///   removed because it was causing a bug when refreshing the page
   useEffect(() =>  {
     if (oldChat === false) {
       setChatId(`CHAT_${getRandomNumber()}`)
     }
     // Checks if dark mode is enabled in local storage
-    const storedDarkMode = localStorage.getItem('dark-mode');
-    if (storedDarkMode) {
-      setIsDarkMode(storedDarkMode);
-    }
+    // const storedDarkMode = localStorage.getItem('dark-mode');
+    // if (storedDarkMode) {
+    //   setIsDarkMode(storedDarkMode);
+    // }
   }, [])
 
   // Sets the initial message when a new chat persona is selected, and generates a new chat id
@@ -179,7 +233,7 @@ function App() {
     if (oldChat === false) {
       setMessages([
         {
-          message: `Hello I'm a ${chatPersona.name} `,
+          message: `Hello, I'm ${chatPersona.name} `,
           sender: "ChatGpt"
         },{
           message: `${chatPersona.description}`,
@@ -208,11 +262,7 @@ function App() {
     }
   }, [messages])
 
-  // Handle stop button when api is thinking
-  function handleStop() {
-    controller.abort()
-    setTypingStatus(false)
-  }
+
   
   // Handles the sending of messages to openai api
   const handleSend = async (message) => {
@@ -241,10 +291,16 @@ function App() {
       return { role: role, content: messageObject.message }
     })
 
+    // changes the language of the chat output when a language is selected
+    const languagePrompt = languageOutput === "Default" ? "" : `This text is typed in english but that doesn't mean you should respond in english. You have to always respond in ${languageOutput} please, never respond in another language!`
+    const newApiPrompt = `${chatPersona.systemMessage.content} ${languagePrompt}`
+    const apiMessageWithLanguage = { role: 'system', content: newApiPrompt}
+
     const apiRequestBody = {
-      "model": "gpt-3.5-turbo",
+      "model": apiModel,
+      "temperature": apiTemperature,
       "messages": [
-        chatPersona.systemMessage,
+        apiMessageWithLanguage,
         ...apiMessages
       ]
     }
@@ -260,6 +316,7 @@ function App() {
     }).then((data) => {
         return data.json()
     }).then((data) => {
+      setApiTokens( apiTokens + data.usage.total_tokens)
       setMessages([
         ...chatMessages, {
           message: data.choices[0].message.content,
@@ -272,24 +329,27 @@ function App() {
   
   return (
     <div className={`app ${isDarkMode && 'app-dark'}`}>
-      <SideMenu setChatPersona={setChatPersona} messages={messages} setMessages={setMessages} setOldChat={setOldChat} setChatId={setChatId} clickedId={clickedId} setClickedId={setClickedId} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} windowSize={windowSize} setIsDarkMode={setIsDarkMode} isDarkMode={isDarkMode}/>
-      <div className="top-and-main">
-        <TopBar chatPersona={chatPersona} windowSize={windowSize} setIsMenuOpen={setIsMenuOpen} isMenuOpen={isMenuOpen} isDarkMode={isDarkMode} />
+      <SideMenu apiTokens={apiTokens} setChatPersona={setChatPersona} messages={messages} setMessages={setMessages} setOldChat={setOldChat} setChatId={setChatId} clickedId={clickedId} 
+                setClickedId={setClickedId} isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} windowSize={windowSize} setIsDarkMode={setIsDarkMode} isDarkMode={isDarkMode} initialInstruction={initialInstruction}/>
+      <div className={`top-and-main ${isMenuOpen ? 'top-and-main-open' : 'top-and-main-closed'}`}>
+        <TopBar chatPersona={chatPersona} windowSize={windowSize} setIsMenuOpen={setIsMenuOpen} isMenuOpen={isMenuOpen} isDarkMode={isDarkMode} isTutorialOpen={isTutorialOpen} setIsTutorialOpen={setIsTutorialOpen} />
         <div className="main-section">
-          <OptionSelection arrayItems={arrayItems} setChatPersona={setChatPersona} setOldChat={setOldChat} windowSize={windowSize} isDarkMode={isDarkMode} />
+          <OptionSelection apiTokens={apiTokens} setIsApiTokenPopupOpen={setIsApiTokenPopupOpen} isApiTokenPopupOpen={isApiTokenPopupOpen} arrayItems={arrayItems} setArrayItems={setArrayItems} setLanguageOutput={setLanguageOutput} languageOutput={languageOutput} setChatPersona={setChatPersona} setOldChat={setOldChat} windowSize={windowSize} isDarkMode={isDarkMode} apiModel={apiModel} 
+          apiTemperature={apiTemperature} apiStream={apiStream} setApiModel={setApiModel} setApiTemperature={setApiTemperature} setApiStream={setApiStream} initialApiInstruction={initialApiInstruction} 
+          setInitialApiInstruction={setInitialApiInstruction} setInitialInstruction={setInitialInstruction} initialInstruction={initialInstruction} />
           <div className={`chat-box`}>
             <MainContainer style={{border: "none", overflow: "visible"}}>
               <ChatContainer >
                 <MessageList
                   style={{overflow: "visible !important"}}
                   scrollBehavior='smooth'
-                  typingIndicator={typingStatus ? <TypingIndicator content="ChatGpt is typing..." /> : null}
+                  typingIndicator={typingStatus ? <TypingIndicator content="TaskBuddy is typing..." /> : null}
                 >
                   {messages.map((message, i) => {
                     return <Message key={i} model={message} />
                   })}
                 </MessageList>
-                <MessageInput fancyScroll={false} ref={inputTxt} placeholder="Type message here" disabled={typingStatus} sendButton={!typingStatus} 
+                <MessageInput fancyScroll={false} ref={inputTxt} placeholder="Send a message..." disabled={typingStatus} sendButton={!typingStatus} 
                   onSend={() => {
                     handleSend(inputValue) 
                     setInputValue("") }} 
@@ -301,13 +361,7 @@ function App() {
               </ChatContainer>
             </MainContainer>
           </div>
-          {/* {typingStatus && 
-          <div className="chat-action-btns">
-            <button className="stop-chat" onClick={() => handleStop()}><img className="stop-icon" src={stopIcon} />Stop</button>
-          </div>
-          } */}
         </div>
-        
       </div>
     </div>
   )

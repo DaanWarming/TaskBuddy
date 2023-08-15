@@ -6,24 +6,54 @@
     top: 0;
     display: flex;
     flex-direction: column;
-    left: -300px;
-    transition: transform 0.3s ease;
     z-index: 99;
+    /* transition: margin-left 0.2s ease-in-out ;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+    transition: min-width 2s ease-in-out !important; */
 }
 
-.side-menu--open {
-    transform: translateX(0px);
+/* .side-menu-closed {
+    /* animation: fadeoutLeft 1s ease-out backwards; */
+    /* flex-grow: 0.0001;
+    min-width: 300px;
+} */
+
+/* .side-menu-open {
+    /* animation: fadeInLeft 0.2s ease-out backwards;
+    flex-grow: 1;
+
+}  */
+
+/* @keyframes fadeInLeft {
+    from {
+        margin-left: -300px;
+    }
+    to {
+        margin-left: 0px;;
+    }
 }
+
+@keyframes fadeOutLeft {
+    from {
+        margin-left: 0px;
+    }
+    to {
+        margin-left: -300px;
+    }
+} */
+
 
 .side-menu-mobile-container {
     position: fixed;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     background-color: rgba(0, 0, 0, 0.5);
     top: 0;
     left: 0;
     z-index: 100;
-    animation: fadeIn 200ms ease-out backwards;
 }
 
 @keyframes fadeInLeft {
@@ -39,7 +69,6 @@
 .side-menu-mobile {
     height: 100%;
     max-width: 300px;
-    animation: fadeInLeft 200ms ease-out backwards;
 }
 
 .side-menu-close {
@@ -81,8 +110,26 @@
     padding: 0;
 }
 
+.no-chats-container {
+    text-align: center;
+    width: 90%;
+    border: 2px dashed #696969;
+    margin: 20px auto 0;
+    border-radius: 8px;
+    padding: 20px 0;
+}
+
+.no-chats-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: #FFFFFF;
+    margin: 0;
+    color: #696969;
+}
+
 .chat-archive-container {
     overflow-y: auto;
+    overflow-x: hidden;
     color-scheme: dark;
 }
 
@@ -189,14 +236,20 @@
     text-align: center;
 }
 
-.account-status {
-    font-size: 12px;
-    font-weight: 600;
+.settings-account {
     border-bottom: 1px solid #4B5563;
     width: 90%;
     margin: 0 auto;
-    padding: 12px 0;
+}
 
+.settings-account-status {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.settings-account-status-tokens {
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .settings-info-bottom {
@@ -312,8 +365,25 @@
     animation: fadeInBottom 200ms ease-out backwards;
 }
 
+.feedback-screen-dark {
+    background-color: #444654;
+}
+
 .feedback-screen h3 {
     margin: 10px 0 0 0;
+    color: #111827;
+}
+
+.feedback-screen-dark h3 {
+    color: #FFFFFF;
+}
+
+.feedback-screen p {
+    color: #111827;
+}
+
+.feedback-screen-dark p {
+    color: #FFFFFF;
 }
 
 .close-btn {
@@ -327,5 +397,15 @@
 .close-btn:hover {
     background-color: #0564FB;
     color: white;
+}
+
+@media screen and (max-width: 345px) {
+    .side-menu-close {
+        left: 295px;
+    }
+
+    .side-menu {
+        max-width: 290px;
+    }
 }
 
